@@ -1,0 +1,57 @@
+<ul class="todos" *ngIf="todos">
+  <li *ngFor="let todo of todos">
+    <div *ngIf="!todo.done">
+      <a class="remove-item" (click)="openModal('custom-modal-1', todo)"><i class="fa fa-edit"></i></a>
+    </div>
+    <div *ngIf="todo.done">
+      <a class="remove-item" (click)="Delete(todo)"><i class="fa fa-trash"></i></a>
+    </div>
+    <div *ngIf="todo.done">
+      <a class="remove-item" (click)="markAsUnDone(todo)"><i class="fa fa-retweet"></i></a>
+    </div>
+    <div *ngIf="!todo.done">
+      <a class="remove-item" (click)="markAsDone(todo)"><i class="fa fa-check"></i></a>
+    </div>
+    <a [ngClass]="{'done' : todo.done}">
+      {{ todo.title }} <br>
+      <small>{{ todo.date | date: 'dd/MM/yyyy - HH:mm' }}</small>
+    </a>
+
+    <!-- Janela Modal para alterar a Tarefa -->
+    <jw-modal id="custom-modal-1">
+      <div>
+        <a class="jw-modal-close" (click)="closeModal('custom-modal-1');">
+          <i class="fa fa-close"></i>
+        </a>
+      </div>
+      <form [formGroup]="form">
+        <h1>Alterar tarefa</h1>
+        <br>
+        <textarea cols="30" rows="2" placeholder="Informe a descrição" formControlName="title"></textarea>
+        <small class="error" *ngIf="form.controls.title.invalid">
+          <strong>Tarefa inválida</strong>
+        </small>
+        <br>
+        <h2>Quando?</h2>
+        <input type="datetime-local" formControlName="date">
+        <small class="error" *ngIf="form.controls.date.invalid">
+          <strong>Data/Hora inválida</strong>
+        </small>
+        <br>
+        <br>
+        <p class="text-right">
+          <app-button style="margin: 0 10px;" (click)="closeModal('custom-modal-1');">
+            <i class="fa fa-close"></i>
+            Cancelar
+          </app-button>
+          <app-button (click)="Update()" [disabled]="form.invalid">
+            <i class="fa fa-save"></i>
+            Salvar
+          </app-button>
+        </p>
+      </form>
+    </jw-modal>
+    <!--  -->
+
+  </li>
+</ul>
