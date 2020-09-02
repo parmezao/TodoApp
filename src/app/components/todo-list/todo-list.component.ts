@@ -3,7 +3,11 @@ import { ModalService } from './../../_modal/modal.service';
 import { Component, OnInit, Input, NgZone } from '@angular/core';
 import { DataService } from 'src/app/data.service';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { Router } from '@angular/router';
+import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import { Observable, Subject } from 'rxjs';
+import { NotificationService } from 'src/app/notification.service';
+import { takeUntil } from 'rxjs/operators';
+import { error } from 'protractor';
 
 @Component({
   selector: 'app-todo-list',
@@ -14,6 +18,7 @@ export class TodoListComponent implements OnInit {
   @Input() todos: any = null;
   public form: FormGroup;
   public todoUpdate: any;
+  protected ngUnsubscribe: Subject<void> = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
@@ -22,6 +27,7 @@ export class TodoListComponent implements OnInit {
     private modalService: ModalService,
     private ngZone: NgZone,
     private router: Router,
+    private notifiyService: NotificationService
   ) {
     this.form = this.fb.group({
       title: ['', Validators.compose([
@@ -34,69 +40,133 @@ export class TodoListComponent implements OnInit {
 
   }
 
+  canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
+    if(!this.isLoggedIn()) {      
+      this.afAuth.signOut();
+      this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
+    }
+    return true;
+  }   
+
+  // Returns true when user is looged in and token not expired (time passed < 60 minutes)
+  isLoggedIn(): boolean {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const validToken = new Date().getTime() <= user.stsTokenManager.expirationTime;
+
+    return (user !== null && validToken) ? true : false;
+  }   
+
   ngOnInit(): void {
   }
 
+  public ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
+  }   
+
   markAsDone(todo) {
-    this.afAuth.idToken.subscribe(token => {
-      const data = { id: todo.id };
-      this.service.markAsDone(data, token).subscribe(res => { todo.done = true });
-    });
+    if (this.isLoggedIn()) {
+      this.afAuth.idToken
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(token => {
+          const data = { id: todo.id };
+          this.service.markAsDone(data, token).subscribe(res => { todo.done = true });
+        });
+    } else {
+      this.ngZone.run(() => {
+        this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
+        this.afAuth.signOut();              
+      });       
+    }
   }
 
   markAsUnDone(todo) {
-    this.afAuth.idToken.subscribe(token => {
-      const data = { id: todo.id };
-      this.service.markAsUnDone(data, token).subscribe(res => { todo.done = false });
-    });
+    if (this.isLoggedIn()) {
+      this.afAuth.idToken
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(token => {
+          const data = { id: todo.id };
+          this.service.markAsUnDone(data, token).subscribe(res => { todo.done = false });
+        });
+    } else {
+      this.ngZone.run(() => {
+        this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
+        this.afAuth.signOut();              
+      });       
+    }   
   }
 
   Delete(todo) {
-    this.afAuth.idToken.subscribe(token => {
-      const data = { id: todo.id };
-      this.service.deleteTodo(data, token).subscribe(res => {
-        this.ngZone.run(() => {
+    if (this.isLoggedIn()) {
+      this.afAuth.idToken
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(token => {
+          const data = { id: todo.id };
+          this.service.deleteTodo(data, token).subscribe(res => {
+            this.ngZone.run(() => {
 
-          // Remove elemento "<li>" da lista de items
-          const index = this.todos.indexOf(todo);
-          if (index !== -1) {
-            this.todos.splice(index, 1);
-          };
+              // Remove elemento "<li>" da lista de items
+              const index = this.todos.indexOf(todo);
+              if (index !== -1) {
+                this.todos.splice(index, 1);
+              };
 
-          this.form.reset();
-          this.router.navigateByUrl("/")
+              this.form.reset();
+              this.router.navigateByUrl("/")
+            });
+          });
         });
-      });
-    });
+    } else {
+      this.ngZone.run(() => {
+        this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
+        this.afAuth.signOut();              
+      });       
+    }    
   }
 
   Update() {
-    this.afAuth.idToken.subscribe(token => {
-      const data = {
-        id: this.todoUpdate.id,
-        title: this.form.controls['title'].value,
-        date: this.form.controls['date'].value
-      };
-      this.service.updateTodo(data, token).subscribe(res => {
+    if (this.isLoggedIn()) {
+      this.afAuth.idToken
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(token => {
+          const data = {
+            id: this.todoUpdate.id,
+            title: this.form.controls['title'].value,
+            date: this.form.controls['date'].value
+          };
+          this.service.updateTodo(data, token).subscribe(res => {
 
-        // Altera elemento "<li>" da lista de items
-        const index = this.todos.indexOf(this.todoUpdate);
-        if (index !== -1) {
-          this.todos[index]['title'] = this.form.controls['title'].value;
-          this.todos[index]['date'] = this.form.controls['date'].value;
-        };
+            // Altera elemento "<li>" da lista de items
+            const index = this.todos.indexOf(this.todoUpdate);
+            if (index !== -1) {
+              this.todos[index]['title'] = this.form.controls['title'].value;
+              this.todos[index]['date'] = this.form.controls['date'].value;
+            };
 
-        this.closeModal('custom-modal-1');
-      });
-    });
+            this.closeModal('custom-modal-1');
+          });
+        });
+    } else {
+      this.ngZone.run(() => {
+        this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
+        this.afAuth.signOut();              
+      });       
+    }
   }
 
   openModal(id: string, todo) {
-    this.modalService.open(id);
-    this.form.controls['title'].setValue(todo.title);
-    this.form.controls['date'].setValue(todo.date);
+    if (this.isLoggedIn()) {
+      this.modalService.open(id);
+      this.form.controls['title'].setValue(todo.title);
+      this.form.controls['date'].setValue(todo.date);
 
-    this.todoUpdate = todo;
+      this.todoUpdate = todo;
+    } else {
+      this.ngZone.run(() => {
+        this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
+        this.afAuth.signOut();              
+      });       
+    }            
   }
 
   closeModal(id: string) {

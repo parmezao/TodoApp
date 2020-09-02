@@ -15,8 +15,8 @@ const routes: Routes = [
       { path: '', component: TodayComponent },
       { path: 'tomorrow', component: TomorrowComponent },
       { path: 'all', component: AllComponent },
-      { path: 'new', component: NewComponent },
-    ],
+      { path: 'new', component: NewComponent, canActivate: [NewComponent] },
+    ]
   },
 ];
 

@@ -7,12 +7,11 @@ import { Router } from '@angular/router';
   template: '<router-outlet></router-outlet>'
 })
 export class AppComponent implements OnInit {
-
   constructor(
     private ngZone: NgZone,
     private afAuth: AngularFireAuth,
     private router: Router,
-  ) {
+  ) {    
   }
 
   ngOnInit(): void {
@@ -20,12 +19,19 @@ export class AppComponent implements OnInit {
       if (data) {
         this.ngZone.run(() => {
           this.router.navigateByUrl('');
-          this.afAuth.idToken.subscribe(token => console.log(token));
+          this.afAuth.idToken.subscribe(token => {
+            localStorage.setItem('user', JSON.stringify(data));
+            JSON.parse(localStorage.getItem('user'));
+          });
         });
       } else {
-        this.ngZone.run(() => this.router.navigateByUrl('/login'));
+        this.ngZone.run(() => {
+          localStorage.setItem('user', null);
+          JSON.parse(localStorage.getItem('user')); 
+
+          this.router.navigateByUrl('/login');
+        })
       }
     });
-
   }
 }

@@ -40,3 +40,18 @@ a:hover {
 .inner-container {
   margin: 25px;
 }
+
+@media (max-width: 600px) {
+  body {
+      padding-top:1.2em;
+  }
+
+  .inner-container .container{
+      padding:1.2em;
+      width:90%;
+      margin-left:-45%;
+  }
+  button {
+      font-size:1em;
+  }
+}
