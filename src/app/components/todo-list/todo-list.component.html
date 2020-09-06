@@ -1,5 +1,8 @@
+<div *ngIf="cardAll" class="search-all">
+  <input class="form-control-all" type="text" name="search" [(ngModel)]="searchText" autocomplete="off" placeholder="&#61442;  Pesquisar...">
+</div>
 <ul class="todos" *ngIf="todos">
-  <li *ngFor="let todo of todos">
+  <li *ngFor="let todo of todos | filter:searchText">
     <div *ngIf="!todo.done">
       <a class="remove-item" (click)="openModal('custom-modal-1', todo)"><i class="fa fa-edit"></i></a>
     </div>

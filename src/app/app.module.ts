@@ -25,6 +25,11 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { environment } from '../environments/environment';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
+import { MessagingService } from './messaging.service';
+import { AngularFireMessagingModule } from '@angular/fire/messaging';
+import { AsyncPipe } from '@angular/common';
+import { Ng2SearchPipeModule } from 'ng2-search-filter';
+
 
 @NgModule({
   declarations: [
@@ -51,14 +56,18 @@ import { ToastrModule } from 'ngx-toastr';
     ModalModule,
     FormsModule,
     BrowserAnimationsModule,
-    ToastrModule.forRoot()
+    ToastrModule.forRoot(),
+    AngularFireMessagingModule,
+    Ng2SearchPipeModule
   ],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,
       useClass: NoCacheHeadersInterceptor,
-      multi: true
-    }
+      multi: true,
+    }, 
+    MessagingService, 
+    AsyncPipe
   ],
   bootstrap: [AppComponent]
 })

@@ -7,17 +7,18 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from
 import { Observable, Subject } from 'rxjs';
 import { NotificationService } from 'src/app/notification.service';
 import { takeUntil } from 'rxjs/operators';
-import { error } from 'protractor';
 
 @Component({
   selector: 'app-todo-list',
   templateUrl: './todo-list.component.html',
   styleUrls: ['./todo-list.component.css']
 })
-export class TodoListComponent implements OnInit {
+export class TodoListComponent implements OnInit, CanActivate {
   @Input() todos: any = null;
   public form: FormGroup;
   public todoUpdate: any;
+  public searchText;
+  public cardAll: boolean;
   protected ngUnsubscribe: Subject<void> = new Subject<void>();
 
   constructor(
@@ -41,28 +42,45 @@ export class TodoListComponent implements OnInit {
   }
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-    if(!this.isLoggedIn()) {      
+    if (!this.isLoggedIn()) {      
       this.afAuth.signOut();
       this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
     }
+    
     return true;
   }   
 
   // Returns true when user is looged in and token not expired (time passed < 60 minutes)
   isLoggedIn(): boolean {
     const user = JSON.parse(localStorage.getItem('user'));
-    const validToken = new Date().getTime() <= user.stsTokenManager.expirationTime;
+    let validToken = false;
+    if (user) {
+      validToken = new Date().getTime() <= user.stsTokenManager.expirationTime;
+    }
 
     return (user !== null && validToken) ? true : false;
   }   
 
   ngOnInit(): void {
+    if (this.router.url === '/all')
+      this.cardAll = true;
   }
 
   public ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }   
+
+  keytab(event) {
+    let element = event.srcElement.nextElementSibling;
+    element = element.focus();
+    let element2 = element.srcElement.nextElementSibling;
+
+    if (element2 == null)
+      return;
+    else
+      element2.focus();  
+  }  
 
   markAsDone(todo) {
     if (this.isLoggedIn()) {

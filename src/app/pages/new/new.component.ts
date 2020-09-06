@@ -6,7 +6,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { NotificationService } from 'src/app/notification.service';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { messaging } from 'firebase';
+import { MessagingService } from 'src/app/messaging.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +26,7 @@ export class NewComponent implements OnInit, CanActivate {
     private router: Router,
     private afAuth: AngularFireAuth,
     private ngZone: NgZone,
-    private notifiyService: NotificationService
+    private notifiyService: NotificationService,
   ) {
     this.form = this.fb.group({
       title: ['', Validators.compose([
@@ -49,10 +49,22 @@ export class NewComponent implements OnInit, CanActivate {
   // Returns true when user is looged in and token not expired (time passed < 60 minutes)
   isLoggedIn(): boolean {
     const user = JSON.parse(localStorage.getItem('user'));
-    const validToken = new Date().getTime() <= user.stsTokenManager.expirationTime;
+    let validToken = false;
+    if (user) {
+      validToken = new Date().getTime() <= user.stsTokenManager.expirationTime;
+    }
 
     return (user !== null && validToken) ? true : false;
   } 
+
+  keytab(event) {
+    let element = event.srcElement.nextElementSibling;
+
+    if (element == null)
+      return;
+    else
+      element.focus();  
+  }
 
   ngOnInit(): void {
   }

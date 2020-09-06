@@ -7,6 +7,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class DataService {
   //public baseUrl = "https://localhost:5001";
   public baseUrl = "https://www.parmex.com.br/todoapi";
+  public serviceAlertUrl = "https://app-alert.herokuapp.com/alert";
 
   constructor(
     private http: HttpClient
@@ -20,6 +21,20 @@ export class DataService {
     } else {
       return null;
     }
+  }
+
+  public composeHeadersFCM() {
+    const headers = new HttpHeaders()
+      .set('Access-Control-Allow-Origin', '*')
+    return headers;
+  }  
+
+  public getAlert(token) {
+     return this.http.get(`${this.baseUrl}/v1/todos/alert`, { headers: this.composeHeaders(token) });
+  }
+
+  public postAlert(data) {
+    return this.http.post(this.serviceAlertUrl, data, { headers: this.composeHeadersFCM()});
   }
 
   public getTodayTodos(token) {
@@ -59,4 +74,5 @@ export class DataService {
   public updateTodo(data, token) {
     return this.http.put(`${this.baseUrl}/v1/todos`, data, { headers: this.composeHeaders(token) });
   }
+
 }
