@@ -19,6 +19,8 @@ export class TodoListComponent implements OnInit, CanActivate {
   public todoUpdate: any;
   public searchText;
   public cardAll: boolean;
+  public currentPage;
+  public itemsPerPage;
   protected ngUnsubscribe: Subject<void> = new Subject<void>();
 
   constructor(
@@ -28,7 +30,7 @@ export class TodoListComponent implements OnInit, CanActivate {
     private modalService: ModalService,
     private ngZone: NgZone,
     private router: Router,
-    private notifiyService: NotificationService
+    private notifiyService: NotificationService,
   ) {
     this.form = this.fb.group({
       title: ['', Validators.compose([
@@ -43,10 +45,10 @@ export class TodoListComponent implements OnInit, CanActivate {
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
     if (!this.isLoggedIn()) {      
-      this.afAuth.signOut();
-      this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
-    }
-    
+      this.notifiyService.showWarning('Sessão expirada! Reconectando...', 'ToDo');
+      this.afAuth.currentUser.then(user => user.getIdToken(true));
+      this.router.navigateByUrl("/");
+    }    
     return true;
   }   
 
@@ -54,7 +56,7 @@ export class TodoListComponent implements OnInit, CanActivate {
   isLoggedIn(): boolean {
     const user = JSON.parse(localStorage.getItem('user'));
     let validToken = false;
-    if (user) {
+    if (user !== null) {
       validToken = new Date().getTime() <= user.stsTokenManager.expirationTime;
     }
 
@@ -88,12 +90,22 @@ export class TodoListComponent implements OnInit, CanActivate {
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(token => {
           const data = { id: todo.id };
-          this.service.markAsDone(data, token).subscribe(res => { todo.done = true });
+          this.service.markAsDone(data, token).subscribe(res => { todo.done = true }, (error) => {
+              if (error) {
+                this.ngZone.run(() => {
+                  this.notifiyService.showWarning('Sessão expirada! Reconectando...', 'ToDo');
+                  this.afAuth.currentUser.then(user => user.getIdToken(true));
+                  this.router.navigateByUrl("/");         
+                });
+              }
+            });
         });
     } else {
       this.ngZone.run(() => {
-        this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
-        this.afAuth.signOut();              
+        //window.location.reload();
+        this.notifiyService.showWarning('Sessão expirada! Reconectando...', 'ToDo');
+        this.afAuth.currentUser.then(user => user.getIdToken(true));
+        this.router.navigateByUrl("/");  
       });       
     }
   }
@@ -104,12 +116,21 @@ export class TodoListComponent implements OnInit, CanActivate {
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(token => {
           const data = { id: todo.id };
-          this.service.markAsUnDone(data, token).subscribe(res => { todo.done = false });
+          this.service.markAsUnDone(data, token).subscribe(res => { todo.done = false }, (error) => {
+            if (error) {
+              this.ngZone.run(() => {
+                this.notifiyService.showWarning('Sessão expirada! Reconectando...', 'ToDo');
+                this.afAuth.currentUser.then(user => user.getIdToken(true));
+                this.router.navigateByUrl("/");         
+              });
+            }            
+          });
         });
     } else {
       this.ngZone.run(() => {
-        this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
-        this.afAuth.signOut();              
+        this.notifiyService.showWarning('Sessão expirada! Reconectando...', 'ToDo');
+        this.afAuth.currentUser.then(user => user.getIdToken(true));
+        this.router.navigateByUrl("/");  
       });       
     }   
   }
@@ -132,12 +153,21 @@ export class TodoListComponent implements OnInit, CanActivate {
               this.form.reset();
               this.router.navigateByUrl("/")
             });
+          }, (error) => {
+            if (error) {
+              this.ngZone.run(() => {
+                this.notifiyService.showWarning('Sessão expirada! Reconectando...', 'ToDo');
+                this.afAuth.currentUser.then(user => user.getIdToken(true));
+                this.router.navigateByUrl("/");         
+              });
+            }             
           });
         });
     } else {
       this.ngZone.run(() => {
-        this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
-        this.afAuth.signOut();              
+        this.notifiyService.showWarning('Sessão expirada! Reconectando...', 'ToDo');
+        this.afAuth.currentUser.then(user => user.getIdToken(true));
+        this.router.navigateByUrl("/");         
       });       
     }    
   }
@@ -162,12 +192,21 @@ export class TodoListComponent implements OnInit, CanActivate {
             };
 
             this.closeModal('custom-modal-1');
+          }, (error) => {
+            if (error) {
+              this.ngZone.run(() => {
+                this.notifiyService.showWarning('Sessão expirada! Reconectando...', 'ToDo');
+                this.afAuth.currentUser.then(user => user.getIdToken(true));
+                this.router.navigateByUrl("/");         
+              });
+            }              
           });
         });
     } else {
       this.ngZone.run(() => {
-        this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
-        this.afAuth.signOut();              
+        this.notifiyService.showWarning('Sessão expirada! Reconectando...', 'ToDo');
+        this.afAuth.currentUser.then(user => user.getIdToken(true));
+        this.router.navigateByUrl("/");           
       });       
     }
   }
@@ -181,8 +220,9 @@ export class TodoListComponent implements OnInit, CanActivate {
       this.todoUpdate = todo;
     } else {
       this.ngZone.run(() => {
-        this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
-        this.afAuth.signOut();              
+        this.notifiyService.showWarning('Sessão expirada! Reconectando...', 'ToDo');
+        this.afAuth.currentUser.then(user => user.getIdToken(true));
+        this.router.navigateByUrl("/");           
       });       
     }            
   }

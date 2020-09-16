@@ -29,7 +29,7 @@ import { MessagingService } from './messaging.service';
 import { AngularFireMessagingModule } from '@angular/fire/messaging';
 import { AsyncPipe } from '@angular/common';
 import { Ng2SearchPipeModule } from 'ng2-search-filter';
-
+import { AngularPaginatorModule } from 'angular-paginator';
 
 @NgModule({
   declarations: [
@@ -58,7 +58,8 @@ import { Ng2SearchPipeModule } from 'ng2-search-filter';
     BrowserAnimationsModule,
     ToastrModule.forRoot(),
     AngularFireMessagingModule,
-    Ng2SearchPipeModule
+    Ng2SearchPipeModule,
+    AngularPaginatorModule
   ],
   providers: [
     {

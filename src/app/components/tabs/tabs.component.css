@@ -17,6 +17,7 @@
 .tabs li a:hover {
   color: rgba(0, 0, 0, 0.8);
   transition: color 1s;
+  text-decoration: none;
 }
 
 .tabs .selected {

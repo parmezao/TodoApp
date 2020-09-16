@@ -39,9 +39,10 @@ export class NewComponent implements OnInit, CanActivate {
   }
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-    if(!this.isLoggedIn()) {      
-      this.afAuth.signOut();
-      this.notifiyService.showWarning('Sessão expirada!', 'ToDo');
+    if(!this.isLoggedIn()) {
+      this.notifiyService.showWarning('Sessão expirada! Reconectando...', 'ToDo');
+      this.afAuth.currentUser.then(user => user.getIdToken(true));
+      this.router.navigateByUrl("/");
     }
     return true;
   }  
@@ -53,7 +54,6 @@ export class NewComponent implements OnInit, CanActivate {
     if (user) {
       validToken = new Date().getTime() <= user.stsTokenManager.expirationTime;
     }
-
     return (user !== null && validToken) ? true : false;
   } 
 
@@ -89,9 +89,9 @@ export class NewComponent implements OnInit, CanActivate {
         }, (error) => {
           if (error) {
             this.ngZone.run(() => {
-              this.notifiyService.showWarning('Sessão expirada!', 'ToDo');              
-              this.form.reset();                           
-              this.afAuth.signOut();              
+              this.notifiyService.showWarning('Sessão expirada! Reconectando...', 'ToDo');
+              this.afAuth.currentUser.then(user => user.getIdToken(true));
+              this.router.navigateByUrl("/");              
             });
           }
         });

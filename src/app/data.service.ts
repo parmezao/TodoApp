@@ -7,7 +7,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class DataService {
   //public baseUrl = "https://localhost:5001";
   public baseUrl = "https://www.parmex.com.br/todoapi";
-  public serviceAlertUrl = "https://app-alert.herokuapp.com/alert";
+  //public serviceAlertUrl = "http://localhost:3000/alert";
+  //public serviceAlertUrl = "https://app-alert.herokuapp.com/alert";
 
   constructor(
     private http: HttpClient
@@ -34,7 +35,8 @@ export class DataService {
   }
 
   public postAlert(data) {
-    return this.http.post(this.serviceAlertUrl, data, { headers: this.composeHeadersFCM()});
+    return this.http.post(`${this.baseUrl}/v1/todos/alert`, data, { headers: this.composeHeadersFCM()});
+    //return this.http.post(this.serviceAlertUrl, data, { headers: this.composeHeadersFCM()});
   }
 
   public getTodayTodos(token) {

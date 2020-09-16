@@ -7,6 +7,7 @@
   </small>
   <br>
   <h2>Quando?</h2>
+  <br>
   <input type="datetime-local" formControlName="date" (keyup.enter)="keytab($event)" >
   <small class="error" *ngIf="form.controls.date.invalid">
     <strong>Data/Hora inválida</strong>

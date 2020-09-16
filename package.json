@@ -21,6 +21,7 @@
     "@angular/platform-browser": "^9.0.7",
     "@angular/platform-browser-dynamic": "^9.0.7",
     "@angular/router": "^9.0.7",
+    "angular-paginator": "^5.0.1",
     "firebase": "^7.8.1",
     "ng2-search-filter": "^0.5.1",
     "ngx-toastr": "^13.0.0",

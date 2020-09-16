@@ -98,3 +98,13 @@ input:focus {
   padding-left: 5px;
   color: rgba(0, 0, 0, 0.3); 
 }
+
+
+.pagination a {
+  border-radius: 5px;
+  background-color: green !important;
+}
+
+.pagination a.active {
+  border-radius: 5px;
+}
